@@ -4,6 +4,10 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import os
 
+
+""" --------------------------- Code to plot one per npz file in a given directory: ----------------------------"""
+
+
 # directory containing my .npz files
 directory_path = r'C:\Users\manue\MASTER_PROJECT_RNA_seq_data\Optimize_ML_simulated_RNA_sequencing_data-main\Optimize_ML_simulated_RNA_sequencing_data-main\LONG_READ_training_data\Simulated_LONG_READ_data_FEB24\Simulated_data_n2_w800_b32'
 
@@ -58,3 +62,55 @@ for npz_file in npz_files:
     rand_seq_numeric = data['rand_seq']  # Assuming rand_seq is saved as numeric values
 
     plot_data(signal_train, map_onehot, rand_seq_numeric, npz_file)
+
+
+
+
+#%%
+
+""" --------------------------- Code to plot single files: ----------------------------"""
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from scipy import signal
+import os
+#%%
+file_path = r'C:\Users\manue\MASTER_PROJECT_RNA_seq_data\Optimize_ML_simulated_RNA_sequencing_data-main\Optimize_ML_simulated_RNA_sequencing_data-main\LONG_READ_training_data\Simulated_LONG_READ_data_FEB24\Simulated_data_n2_w800_b32\train_data_0.npz'
+
+# Load the .npz file
+data = np.load(file_path)
+
+# List all arrays in the .npz file
+print(list(data.keys()))
+
+# %%
+signal_train = data['signal_train']
+map_onehot = data['map_onehot']
+rand_seq = data['rand_seq']
+# %%
+# Plots
+import matplotlib.pyplot as plt
+
+# Plot signal_train for the first instance
+plt.figure(figsize=(14, 6))
+plt.plot(signal_train[0], label='Signal Train')
+plt.title('Signal Train')
+plt.xlabel('Time Points')
+plt.ylabel('Signal')
+plt.legend()
+plt.show()
+
+# Plot map_onehot
+
+signal_train = data['signal_train']
+map_onehot = data['map_onehot']
+
+random_data_point = np.random.randint(0, signal_train.shape[0])
+
+plt.figure(figsize=(10, 6))
+
+plt.contourf(map_onehot[random_data_point])
+
+
+# %%
+

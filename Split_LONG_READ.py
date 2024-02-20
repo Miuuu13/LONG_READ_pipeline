@@ -1,12 +1,9 @@
 #%% 
 import os
 import numpy as np
-
 #Code to split the long read
-
 # long read data is saved in folder LONG_READ_training_data in working directory
 # Plan: Split the long read into fragments à 800 time points with an overlap of 
-
 base_path = os.getcwd()
 #path_save = path_in + r"\Simulated_data_30JAN24_batch32\Simulated_data_n2_w800_b32"
 
@@ -20,6 +17,9 @@ if not os.path.exists(path_save):
 
 # List all .npz files in the directory
 npz_files = [f for f in os.listdir(path_to_long_read) if f.endswith('.npz')]
+print(npz_files)
+
+#%%
 
 # use this function later to loop through all files in the directory that contains the long read data
 def split_and_save(npz_file, segment_length, overlap):
@@ -39,7 +39,7 @@ def split_and_save(npz_file, segment_length, overlap):
         
         segment_signal = signal_train[:, start:end]
         segment_map = map_onehot[:, start:end, :]
-        segment_rand_seq = rand_seq[:, start:end, :]
+        #segment_rand_seq = rand_seq[:, start:end, :]
         
         # Save the segment
         segment_file_name = f"{base_name}_{chr(97 + i)}.npz"  # a, b, c, ...

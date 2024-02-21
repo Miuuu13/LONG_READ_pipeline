@@ -3,10 +3,16 @@ Project: LONG READ  start: 08.02.2024
 
 Steps to take:
 
-generate long read data
+# 1. Generate LONG READ data (6000 time points) - save in folder LONG_READ_training_data
 
-split the single long read to fragments that can be put into a NN
 
-Basecalling on fragments
+# 2. Split LONG READ into fragments à 800 time points - save in folder LONG_READ_training_data_splitted
 
-Realign sequence fragments
+
+# 3. Basecalling on fragments - save results in folder
+
+
+# 4. Rearrange results of fragments back to LONG READ
+
+
+# 5. Compare original LONG READ rand_seq with basecalling prediction

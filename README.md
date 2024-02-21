@@ -1,5 +1,5 @@
 # LONG_READ_pipeline
-Project: LONG READ  start: 08.02.2024
+Project: LONG READ start: 19.02.2024
 
 Steps to take:
 

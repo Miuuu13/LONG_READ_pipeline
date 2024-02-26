@@ -10,7 +10,7 @@ import os
 # working directory
 base_path = os.getcwd()
 # path to save the generated files
-path_save = os.path.join(base_path, 'LONG_READ_training_data')
+path_save = os.path.join(base_path, r'LONG_READ_training_data')
 
 # Check if the save path exists, if not, create it
 if not os.path.exists(path_save):
@@ -135,4 +135,3 @@ def Generate_sim_signal(N_batch, batch_size , path, kmer_info, seq_len , time_po
 #Generate_sim_signal(N_batch, batch_size , path_save, kmer_info, seq_len, time_points)
 
 # %%
-

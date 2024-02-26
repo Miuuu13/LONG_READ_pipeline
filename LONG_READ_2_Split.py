@@ -4,8 +4,8 @@ import numpy as np
 
 base_path = os.getcwd()
 
-path_to_long_read = os.path.join(base_path, 'LONG_READ_training_data')
-path_save = os.path.join(base_path, 'LONG_READ_training_data_splitted')
+path_to_long_read = os.path.join(base_path, r'LONG_READ_training_data')
+path_save = os.path.join(base_path, r'LONG_READ_training_data_splitted')
 
 # Check if the save path exists, if not, create it
 if not os.path.exists(path_save):
@@ -51,9 +51,5 @@ fragment_length = 1200  # Example fragment length, adjust as needed
 for npz_file in npz_files:
     full_path_to_file = os.path.join(path_to_long_read, npz_file)
     split_and_save(full_path_to_file, fragment_length)
-
-
-
-
 
 

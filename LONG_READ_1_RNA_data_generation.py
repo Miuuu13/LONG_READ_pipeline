@@ -1,50 +1,42 @@
 #%%
 import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
 from scipy import signal
 import os
+import pandas as pd
 
 """ Script to generate LONG READS (6000 time points), noise level 2 %, batch_size = 32 """
 
-# working directory
-base_path = os.getcwd()
-# path to save the generated files
-path_save = os.path.join(base_path, r'LONG_READ_training_data')
+base_path = os.getcwd() # working directory
+path_save_long_read = os.path.join(base_path, r'LONG_READ_training_data')
 
 # Check if the save path exists, if not, create it
-if not os.path.exists(path_save):
-    os.makedirs(path_save)
+if not os.path.exists(path_save_long_read ):
+    os.makedirs(path_save_long_read )
 
 # fixed parameters
 seq_len = 3000 # was 35 for 400 - 800 time points (benchamrking), increase
-time_points = 60000  
-N_batch = 1 # Number of files that are generated
+time_points = 60_000  
+N_batch = 1 # Number of npz files that are generated
 batch_size = 32
 
 # Acess kmer table 
 kmer_info = pd.read_csv('template_median68pA_200mv.txt', delim_whitespace=True)
 kmer_info = kmer_info.values
 
-
 def Generate_sim_signal(N_batch, batch_size , path, kmer_info, seq_len , time_points):
-    
     """ Function to generate the LONG READ """
+    
     seq_len = seq_len + 5
     labels = 5
     kmer_length = 5
 
     for j in range (N_batch):
-
         print(j)
-
         Sim_raw_signal_tot = np.zeros([batch_size,time_points])
         Map_raw_signal_tot = np.zeros([batch_size,time_points,labels])
-        #ramp_signal_tot = np.zeros([batch_size,time_points,1])
 
         for k in range(batch_size):
-
-            # used to generate random time step where the k-mer is readed
+            # generate random time step to read k-mer
             Rand_seq = np.random.randint(0,4, seq_len)
             rand_seq_base =np.empty(seq_len, dtype=str)
             Sim_raw_signal = np.zeros([time_points])
@@ -55,17 +47,13 @@ def Generate_sim_signal(N_batch, batch_size , path, kmer_info, seq_len , time_po
             base_dict_2 = { "A":0, "C":1, "G":2, "T":3}
 
             for i in range(len(Rand_seq)):
-
                 rand_seq_base[i] = base_dict[Rand_seq[i]]
-
             probe_raw_data = 0
             mu, sigma = 3.686, 0.4254
 
             for i in range(seq_len - kmer_length + 1):
-
-                #obtain the k-mer Raw-signal value
+                #obtain k-mer Raw-signal value
                 if i > 0:
-
                     #find the k-mer value in the table and associate the specific signal value
                     Single_kmer_vector = rand_seq_base[i: i + kmer_length]
                     Single_kmer = ''.join(rand_seq_base[i: i + kmer_length])
@@ -77,8 +65,7 @@ def Generate_sim_signal(N_batch, batch_size , path, kmer_info, seq_len , time_po
                     kmer_std = (1/4)*kmer_info[probe_kmer[0],2]
                     Signal_kmer = np.random.normal(kmer_center, kmer_std)
 
-                    # from the distribution, obtain the number of time points that the k-mer is present
-                    # in the signal
+                    # from the distribution, obtain the number of time points that the k-mer is present in the signal
                     N_step = int(np.random.lognormal(mu, sigma))
 
                     while N_step < 20:
@@ -87,17 +74,14 @@ def Generate_sim_signal(N_batch, batch_size , path, kmer_info, seq_len , time_po
                     Sim_raw_signal[probe_raw_data : probe_raw_data + N_step] = Signal_kmer
 
                     Spc = 3
-
                     if i == 1:
 
                         if np.random.randint(2) == 0:
-
                             Map_raw_signal_S[probe_raw_data : probe_raw_data + N_step - Spc, base_dict_2[Single_kmer_vector[-1]]] = 1
                             Map_raw_signal_S[probe_raw_data + N_step - Spc : probe_raw_data + N_step, -1] = 1
 
                         else:
                             Map_raw_signal_S[probe_raw_data + Spc : probe_raw_data + N_step -Spc, base_dict_2[Single_kmer_vector[-1]]] = 1
-
                             #this is for adding blank signal
                             Map_raw_signal_S[0 : Spc, -1] = 1
                             Map_raw_signal_S[probe_raw_data + N_step -Spc : probe_raw_data + N_step, -1] = 1
@@ -112,7 +96,7 @@ def Generate_sim_signal(N_batch, batch_size , path, kmer_info, seq_len , time_po
 
                     probe_raw_data += N_step
 
-            # filter the frequency
+            # filter frequency
             filtered_signal = signal.savgol_filter(Sim_raw_signal, 11, 1) #was 10, 1 must be odd
 
             # add noise, 2 % for LONG READ
@@ -131,7 +115,6 @@ def Generate_sim_signal(N_batch, batch_size , path, kmer_info, seq_len , time_po
 
         np.savez_compressed(os.path.join(path,file_name), signal_train = Sim_raw_signal_tot, map_onehot = Map_raw_signal_tot, rand_seq = Rand_seq)
 
-# function call removed -> used in main script now:
-#Generate_sim_signal(N_batch, batch_size , path_save, kmer_info, seq_len, time_points)
+
 
 # %%

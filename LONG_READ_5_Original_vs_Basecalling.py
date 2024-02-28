@@ -1,6 +1,262 @@
+
 #%%
 
-# not cmpleted
+import numpy as np
+import matplotlib.pyplot as plt
+import difflib
+
+base_path = os.getcwd() # working directory
+path_to_rearranged = os.path.join(base_path, r'LONG_READ_rearranged')
+
+basecalled_data_rearranged = np.load(path_to_rearranged)
+
+# Load the rearranged basecalled data
+basecalled_data_rearranged = np.load(path_to_rearranged)
+
+# List all the keys in the .npz file
+keys = basecalled_data_rearranged.files
+print("Keys in the .npz file:", keys)
+
+
+
+#%%
+original_seq = basecalled_data_rearranged['original_data']  
+basecalled_seq = basecalled_data_rearranged['basecalling']
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#%%
+import numpy as np
+import matplotlib.pyplot as plt
+import difflib
+
+def load_sequences(original_path, basecalled_path):
+    """
+    Load the original and basecalled sequences from .npz files.
+    """
+    original_data = np.load(original_path)
+    basecalled_data = np.load(basecalled_path)
+    
+    original_seq = original_data['original_data']  # Update the key if necessary
+    basecalled_seq = basecalled_data['basecalling']  # Update the key if necessary
+    
+    return original_seq, basecalled_seq
+
+def seq_to_letters(sequence):
+    """
+    Convert a numerical sequence to a string of letters.
+    """
+    base_dict = {0: "A", 1: "C", 2: "G", 3: "T"}
+    return ''.join([base_dict.get(item, 'N') for item in sequence])
+
+def calculate_mismatches(seq1, seq2):
+    """
+    Calculate the number of mismatches between two sequences.
+    This includes insertions, deletions, and substitutions.
+    """
+    s = difflib.SequenceMatcher(None, seq1, seq2)
+    mismatches = sum(max(j2 - j1, i2 - i1) for i1, i2, j1, j2 in s.get_opcodes() if i1 != i2 or j1 != j2)
+    return mismatches
+
+def plot_sequences(original_seq, basecalled_seq):
+    """
+    Plot the original sequence over the basecalled sequence and highlight mismatches in red.
+    """
+    plt.figure(figsize=(20, 4))
+    for i, (o, b) in enumerate(zip(original_seq, basecalled_seq)):
+        color = 'red' if o != b else 'black'
+        plt.text(i, 1, o, color=color, fontsize=12, ha='center')
+        plt.text(i, 0, b, color=color, fontsize=12, ha='center')
+    
+    plt.axis('off')
+    plt.tight_layout()
+    plt.show()
+
+# Example usage
+original_path = 'path/to/original/sequence.npz'  # Update this path
+basecalled_path = 'path/to/basecalled/sequence.npz'  # Update this path
+
+original_seq, basecalled_seq = load_sequences(original_path, basecalled_path)
+original_letters = seq_to_letters(original_seq)
+basecalled_letters = seq_to_letters(basecalled_seq)
+
+print("Original Sequence: ", original_letters)
+print("Basecalled Sequence: ", basecalled_letters)
+
+mismatches = calculate_mismatches(original_letters, basecalled_letters)
+print("Number of Mismatches: ", mismatches)
+
+plot_sequences(original_letters, basecalled_letters)
+
+
+
+
+
+#%%
+
+
+
+
+
+
+
+import numpy as np
+
+base_path = os.getcwd() # working directory
+path_ro_original_seq = os.path.join(base_path, r'LONG_READ_training_data')
+path_ro_basecalled_seq = 
+
+# Load original sequence
+original_file_path = 'path/to/original/sequence.npz'  # Update this path
+with np.load(original_file_path) as data:
+    original_seq = data['rand_seq']  # Update key if necessary
+
+# Load basecalled sequence
+basecalled_file_path = 'path/to/basecalled/sequence.npz'  # Update this path
+with np.load(basecalled_file_path) as data:
+    basecalled_seq = data['basecalling']  # Update key if necessary
+
+# Assume both sequences are now loaded as 1D numpy arrays or lists
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#%%
+import os
+import numpy as np
+import matplotlib.pyplot as plt
+
+def load_sequence(npz_path, array_key):
+    """
+    Load a sequence from a .npz file.
+
+    Parameters:
+    - npz_path: Path to the .npz file.
+    - array_key: Key of the array inside the .npz file to be loaded.
+
+    Returns:
+    - sequence: Loaded sequence as a NumPy array.
+    """
+    data = np.load(npz_path)
+    sequence = data[array_key]
+    return sequence
+
+def compare_sequences(generated_seq, basecalled_seq):
+    """
+    Compare two sequences and identify mismatches.
+    
+    Parameters:
+    - generated_seq: The original sequence generated.
+    - basecalled_seq: The sequence obtained from basecalling.
+    
+    Returns:
+    - mismatches: A list of tuples, each containing the index and the mismatching characters (generated, basecalled).
+    """
+    mismatches = []
+    generated_seq, basecalled_seq = generated_seq.flatten(), basecalled_seq.flatten()
+    min_length = min(len(generated_seq), len(basecalled_seq))
+
+    for i in range(min_length):
+        if generated_seq[i] != basecalled_seq[i]:
+            mismatches.append((i, generated_seq[i], basecalled_seq[i]))
+
+    return mismatches  # Ensure that this line is present to always return a list
+
+
+
+def plot_mismatches(generated_seq, basecalled_seq, mismatches):
+    """
+    Plot the original and basecalled sequences, highlighting mismatches.
+    
+    Parameters:
+    - generated_seq: The original generated sequence.
+    - basecalled_seq: The basecalled sequence.
+    - mismatches: A list of mismatches as returned by compare_sequences. If None, no mismatches will be plotted.
+    """
+    if mismatches is None:
+        mismatches = []  # Ensure mismatches is an empty list if None was passed
+
+    plt.figure(figsize=(20, 3))
+    for i, char in enumerate(generated_seq.flatten()):
+        # Check if the current index is in the list of mismatch positions
+        color = 'red' if any(m[0] == i for m in mismatches) else 'black'
+        plt.text(i, 1, str(char), color=color, ha='center', va='center', fontsize=8)
+
+    for i, char in enumerate(basecalled_seq.flatten()):
+        color = 'red' if any(m[0] == i for m in mismatches) else 'black'
+        plt.text(i, 0, str(char), color=color, ha='center', va='center', fontsize=8)
+
+    plt.axis('off')
+    plt.tight_layout()
+    plt.show()
+
+
+
+
+
+
+
+
+
+
+
+
+#%%
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 import os
 import numpy as np 
 import matplotlib.pyplot as plt

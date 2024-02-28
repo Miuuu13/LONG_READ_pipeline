@@ -2,30 +2,23 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import os
+
+""" Main script to run LONG READ pipeline """
+
 # working directory
 base_path = os.getcwd()
 
-#Steps to take:
+# Steps of the pipeline
 
 #%%
-# 1. Generate LONG READ data (6000 time points) - save in folder LONG_READ_training_data
+# 1. Generate LONG READ data (60_000 time points) - save in folder LONG_READ_training_data
 
-from LONG_READ_1_RNA_data_generation import Generate_sim_signal, N_batch, batch_size , path_save, kmer_info, seq_len, time_points
+from LONG_READ_1_RNA_data_generation import Generate_sim_signal, N_batch, batch_size , path_save_long_read , kmer_info, seq_len, time_points
 
-Generate_sim_signal(N_batch, batch_size , path_save, kmer_info, seq_len, time_points)
-
-#%%
-"""OPTIONAL: Plot
-from Plot_npz_files import plot_all_data_in_directory
-
-# directory containing my .npz files
-directory_path = os.path.join(base_path, 'LONG_READ_training_data')
-
-plot_all_data_in_directory(directory_path)
-"""
+Generate_sim_signal(N_batch, batch_size , path_save_long_read , kmer_info, seq_len, time_points)
 
 #%%
-# 2. Split LONG READ into fragments à 800 time points - save in folder LONG_READ_training_data_splitted
+# 2. Split LONG READ into fragments à 1200 time points - save in folder LONG_READ_training_data_splitted
 from LONG_READ_2_Split import split_and_save, npz_files, path_to_long_read
 import os
 
@@ -42,51 +35,96 @@ from LONG_READ_3_Basecalling import predict_and_save_basecalling, input_dir, out
 
 predict_and_save_basecalling(input_dir, output_dir, model_path)
 
+
 #%%
-from LONG_READ_4_Rearrange import  rearrange_fragments_to_long_read
 # 4. Rearrange results of fragments back to LONG READ
-# Call the function with the directory and the desired output filename
-rearrange_fragments_to_long_read(input_dir, output_dir, 'basecalled_long_read_rearranged.npz')
+from LONG_READ_4_Rearrange import rearrange_fragments_to_long_read, input_dir, path_save_rearranged, output_filename
+
+base_path = os.getcwd()
+
+rearrange_fragments_to_long_read(input_dir, path_save_rearranged, output_filename)
 
 #%%
-path_rearranged = r"C:\Users\manue\MASTER_PROJECT_RNA_seq_data\Optimize_ML_simulated_RNA_sequencing_data-main\Optimize_ML_simulated_RNA_sequencing_data-main\LONG_READ_data_rearranged\basecalled_long_read_rearranged.npz"
+
+# 4. Rearrange results of fragments back to LONG READ
+rearranged_npz = r"C:\Users\manue\MASTER_PROJECT_RNA_seq_data\Optimize_ML_simulated_RNA_sequencing_data-main\Optimize_ML_simulated_RNA_sequencing_data-main\LONG_READ_training_data_rearranged\basecalled_long_read_rearranged.npz"
+data = np.load(rearranged_npz)
+print(list(data.keys()))
+
+long_read = data['long_read']
+print(long_read)
+
+# long read is saved with 
+"""
+['long_read']
+[[[1.50911538e-02 5.19840181e-01 5.17301844e-04 6.47091586e-03
+   4.58080381e-01]
+  [6.93952339e-03 4.34740514e-01 2.79572268e-04 5.56761539e-03
+   5.52472770e-01]
+  [3.66408913e-03 3.83335382e-01 2.74935010e-04 6.44197734e-03
+   6.06283545e-01]
+  ...
+  [1.68079495e-01 3.43627006e-01 2.08609685e-01 2.32912704e-01
+   4.67710607e-02]
+  [1.62946343e-01 3.31625313e-01 2.07538679e-01 2.28884533e-01
+   6.90051466e-02]
+  [1.52573749e-01 3.03563654e-01 2.01893032e-01 2.24403754e-01
+   1.17565751e-01]]
+
+ [[2.81222351e-02 5.32392692e-03 5.82746685e-01 3.03320307e-03
+   3.80774051e-01]
+  [1.60369612e-02 3.69668752e-03 5.52399814e-01 3.24702542e-03
+   4.24619466e-01]
+  [1.17807081e-02 2.47922959e-03 5.66019773e-01 4.02401946e-03
+   4.15696263e-01]
+  ...
+"""
 
 
 
-def plot_data(signal_train, map_onehot, rand_seq_numeric, file_name):
-    # Convert numeric sequence to string using a predefined dictionary
-    base_dict = {0: "A", 1: "C", 2: "G", 3: "T"}
-    rand_seq = ''.join([base_dict[num] for num in rand_seq_numeric])
-    
-    # Start plotting
-    fig, axs = plt.subplots(3, 1, figsize=(14, 20), constrained_layout=True)
 
-    # Plot Signal Train
-    axs[0].plot(signal_train)
-    axs[0].set_title('Signal Train')
 
-    # Plot Filled Contour for map_onehot
-    if map_onehot.any():
-        axs[1].contourf(map_onehot.T, cmap='viridis', levels=np.linspace(0, 1, num=50))
-        axs[1].set_title('Filled Contour of One-hot Encoded Map')
-        axs[1].set_xlabel('Time Point')
-        axs[1].set_ylabel('Nucleotide Position')
 
-    # Plot Heatmap for map_onehot using Seaborn
-    sns.heatmap(map_onehot.T, cmap="YlGnBu", cbar_kws={'label': 'Feature Activation'}, ax=axs[2])
-    axs[2].set_title('Map Onehot Features Over Time')
-    axs[2].set_xlabel('Time Points')
-    axs[2].set_ylabel('Features')
-    # Adjusting the y-ticks to show all feature labels
-    axs[2].set_yticks(range(map_onehot.shape[1]))
-    axs[2].set_yticklabels([f'Feature {i}' for i in range(map_onehot.shape[1])])
 
-    plt.suptitle(file_name)
-    plt.show()
-
-    # Print the sequence as a string
-    print(f"Random Sequence for {file_name}: {rand_seq}")
-    
 #%%
-# 5. Compare original LONG READ rand_seq with basecalling prediction
+import numpy as np
+base_path = os.getcwd()
+def load_npz_file(file_path):
+    """
+    Load an NPZ file and print its keys.
+    """
+    with np.load(file_path) as data:
+        print("Keys in the NPZ file:", data.keys())
+        return {key: data[key] for key in data.keys()}
+
+output_dir = os.path.join(base_path, 'LONG_READ_training_data_rearranged')
+load_npz_file(output_dir)
+
+data = load_npz_file(output_dir)
+basecalling = data['basecalling']
+original_data = data['original_data']
+
+print(basecalling)
+print(original_data)
+
+#%%
+from LONG_READ_5_Original_vs_Basecalling import compare_sequences, load_sequence, plot_mismatches
+base_path = os.getcwd()
+
+# Load sequences
+original_seq_path = os.path.join(base_path, 'LONG_READ_training_data')
+basecalled_seq_path = os.path.join(base_path, 'LONG_READ_data_rearranged')
+
+# Assuming you're comparing the first .npz file in each directory
+original_seq_file = next((f for f in os.listdir(original_seq_path) if f.endswith('.npz')), None)
+basecalled_seq_file = next((f for f in os.listdir(basecalled_seq_path) if f.endswith('.npz')), None)
+
+if original_seq_file and basecalled_seq_file:
+    original_seq = load_sequence(os.path.join(original_seq_path, original_seq_file), 'rand_seq')
+    basecalled_seq = load_sequence(os.path.join(basecalled_seq_path, basecalled_seq_file), 'basecalling')
+
+    mismatches = compare_sequences(original_seq, basecalled_seq)
+    plot_mismatches(original_seq, basecalled_seq, mismatches)
+else:
+    print("Required .npz files not found in the directories.")
 # %%

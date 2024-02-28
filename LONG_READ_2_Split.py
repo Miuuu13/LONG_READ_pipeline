@@ -51,3 +51,10 @@ fragment_length = 1200  # Example fragment length, adjust as needed
 for npz_file in npz_files:
     full_path_to_file = os.path.join(path_to_long_read, npz_file)
     split_and_save(full_path_to_file, fragment_length)
+
+
+
+
+
+
+# %%

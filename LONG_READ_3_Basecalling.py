@@ -4,7 +4,6 @@ import numpy as np
 import os
 
 def predict_and_save_basecalling(input_dir, output_dir, model_path):
-    # Load the model
     model = tf.keras.models.load_model(model_path)
     
     if not os.path.exists(output_dir):
@@ -21,6 +20,7 @@ def predict_and_save_basecalling(input_dir, output_dir, model_path):
                 
             # Predict basecalling
             predictions = model.predict(x_data, batch_size=32)
+        
             
             # Save the prediction and original data into a new .npz file
             output_file_path = os.path.join(output_dir, f"basecalled_{file_name}")
@@ -34,3 +34,5 @@ output_dir = os.path.join(base_path, r'LONG_READ_training_data_basecalled')
 
 model_path = os.path.join(base_path, r'UNET_LSTM_n2_w1200_64f_e20_b32_22FEB24.h5')
 
+
+# %%

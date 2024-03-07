@@ -6,18 +6,11 @@ import pandas as pd
 
 """ Script to generate LONG READS (6000 time points), noise level 2 %, batch_size = 32 """
 
-base_path = os.getcwd() # working directory
+base_path = os.getcwd() # working directory # in main
 path_save_long_read = os.path.join(base_path, r'LONG_READ_training_data')
-
 # Check if the save path exists, if not, create it
 if not os.path.exists(path_save_long_read ):
     os.makedirs(path_save_long_read )
-
-# fixed parameters
-seq_len = 3000 # was 35 for 400 - 800 time points (benchamrking), increase
-time_points = 60_000  
-N_batch = 1 # Number of npz files that are generated
-batch_size = 32
 
 # Acess kmer table 
 kmer_info = pd.read_csv('template_median68pA_200mv.txt', delim_whitespace=True)
@@ -113,7 +106,7 @@ def Generate_sim_signal(N_batch, batch_size , path, kmer_info, seq_len , time_po
 
         file_name = "train_data_{}.npz".format(j);
 
-        np.savez_compressed(os.path.join(path,file_name), signal_train = Sim_raw_signal_tot, map_onehot = Map_raw_signal_tot, rand_seq = Rand_seq)
+        np.savez_compressed(os.path.join(path,file_name), signal_train=Sim_raw_signal_tot, map_onehot=Map_raw_signal_tot, rand_seq = Rand_seq)
 
 
 

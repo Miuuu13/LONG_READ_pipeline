@@ -11,21 +11,27 @@ base_path = os.getcwd()
 # Steps of the pipeline
 
 #%%
-# 1. Generate LONG READ data (60_000 time points) - save in folder LONG_READ_training_data
+# 1. Generate LONG READ data (60_000 time points) - save in folder LONG_READ_training_data in wd
 
-from LONG_READ_1_RNA_data_generation import Generate_sim_signal, N_batch, batch_size , path_save_long_read , kmer_info, seq_len, time_points
+from LONG_READ_1_RNA_data_generation import Generate_sim_signal, kmer_info, path_save_long_read
+
+seq_len = 3000 # was 35 for 400 - 800 time points (benchamrking), increase
+time_points = 60_000  
+N_batch = 1 # Number of npz files that are generated
+batch_size = 32
 
 Generate_sim_signal(N_batch, batch_size , path_save_long_read , kmer_info, seq_len, time_points)
 
 #%%
 # 2. Split LONG READ into fragments à 1200 time points - save in folder LONG_READ_training_data_splitted
-from LONG_READ_2_Split import split_and_save, npz_files, path_to_long_read
-import os
+from LONG_READ_2_Split import split_and_save, npz_files, path_to_long_read, path_save
+
+fragment_length = 1200
 
 for npz_file in npz_files:
-    full_path = os.path.join(path_to_long_read, npz_file)
-    split_and_save(full_path, fragment_length=1200, overlap = 0)
-    print(f"Processed and split: {npz_file}")
+    full_path_to_file = os.path.join(path_to_long_read, npz_file)
+    split_and_save(full_path_to_file, fragment_length)
+
 
 #%%
 # 3. Basecalling on fragments - save results in folder

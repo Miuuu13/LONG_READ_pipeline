@@ -17,3 +17,6 @@ Steps to take:
 
 5. Compare original LONG READ rand_seq with basecalling prediction
 
+
+Plan for the future: GUI
+

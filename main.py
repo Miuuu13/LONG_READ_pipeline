@@ -11,9 +11,9 @@ base_path = os.getcwd()
 # Steps of the pipeline
 
 #%%
-# 1. Generate LONG READ data (60_000 time points) - save in folder LONG_READ_training_data in wd
+""" 1. Generate LONG READ data (60_000 time points) - save in folder LONG_READ_training_data in wd """
 
-from LONG_READ_1_RNA_data_generation import Generate_sim_signal, kmer_info, path_save_long_read
+from LONG_READ_1_Generate_RNA_Long_read import Generate_sim_signal, kmer_info, path_save_long_read
 
 seq_len = 3000 # was 35 for 400 - 800 time points (benchamrking), increase
 time_points = 60_000  
@@ -23,8 +23,31 @@ batch_size = 32
 Generate_sim_signal(N_batch, batch_size , path_save_long_read , kmer_info, seq_len, time_points)
 
 #%%
+""" Plot the signal of the generated long read """
+#from LONG_READ_plotting_functions import plot_signal_train 
+#import does not work...
+
+directory_path = path_save_long_read #folder 'LONG_READ_training_data'
+file_name = 'train_data_0.npz'
+file_path = os.path.join(directory_path, file_name)
+
+data = np.load(file_path)
+signal_train = data['signal_train'][0]  
+
+def plot_signal_train(signal_train, file_name):
+    plt.figure(figsize=(14, 5))  
+    plt.plot(signal_train)
+    plt.title(f'Signal Train for {file_name}')
+    plt.xlabel('Time Points')
+    plt.ylabel('Signal Value')
+    plt.show()
+
+plot_signal_train(signal_train, file_name)
+
+
+#%%
 # 2. Split LONG READ into fragments à 1200 time points - save in folder LONG_READ_training_data_splitted
-from LONG_READ_2_Split import split_and_save, npz_files, path_to_long_read, path_save
+from LONG_READ_2_Split import split_and_save, npz_files, path_to_long_read
 
 fragment_length = 1200
 
@@ -32,6 +55,45 @@ for npz_file in npz_files:
     full_path_to_file = os.path.join(path_to_long_read, npz_file)
     split_and_save(full_path_to_file, fragment_length)
 
+#%%
+    
+""" Check a splitted npz file """
+
+def print_npz_contents(file_path):
+    
+    data = np.load(file_path)
+    
+    # list all keys
+    print("Key in .npz file:")
+    for key in data.keys():
+        print(f"- {key}")
+    
+    # check content of each key
+    for key in data.keys():
+        print(f"\nContent of '{key}':")
+        content = data[key]
+        print(content)
+        
+        print(f"Data type: {content.dtype}, Shape: {content.shape}")
+        
+
+# function call
+#file_path = r'C:\Users\manue\MASTER_PROJECT_RNA_seq_data\Optimize_ML_simulated_RNA_sequencing_data-main\Optimize_ML_simulated_RNA_sequencing_data-main\LONG_READ_training_data_splitted\train_data_0_fragment_1.npz'
+#print_npz_contents(file_path)
+file_path = r"C:\Users\manue\MASTER_PROJECT_RNA_seq_data\Optimize_ML_simulated_RNA_sequencing_data-main\Optimize_ML_simulated_RNA_sequencing_data-main\LONG_READ_training_data_splitted\train_data_0_fragment_3.npz"
+print_npz_contents(file_path)
+
+#%%
+""" Plot first split (fragment 1) signal of the long read"""   
+from LONG_READ_plotting_functions import plot_signal_train 
+directory_path = os.path.join(base_path, "LONG_READ_training_data_splitted")
+file_name = 'train_data_0_fragment_1.npz'
+file_path = os.path.join(directory_path, file_name)
+
+data = np.load(file_path)
+signal_train = data['signal_train'][0]  #i plotted several, to check
+
+plot_signal_train(signal_train, file_name)
 
 #%%
 # 3. Basecalling on fragments - save results in folder
@@ -40,6 +102,59 @@ from LONG_READ_3_Basecalling import predict_and_save_basecalling, input_dir, out
     # Ensure the output directory exists
 
 predict_and_save_basecalling(input_dir, output_dir, model_path)
+
+#%%
+
+def print_npz_contents(file_path):
+    
+    data = np.load(file_path)
+    
+    # list all keys
+    print("Key in .npz file:")
+    for key in data.keys():
+        print(f"- {key}")
+    
+    # check content of each key
+    for key in data.keys():
+        print(f"\nContent of '{key}':")
+        content = data[key]
+        print(content)
+        
+        print(f"Data type: {content.dtype}, Shape: {content.shape}")
+        
+
+# function call
+#file_path = r'C:\Users\manue\MASTER_PROJECT_RNA_seq_data\Optimize_ML_simulated_RNA_sequencing_data-main\Optimize_ML_simulated_RNA_sequencing_data-main\LONG_READ_training_data_splitted\train_data_0_fragment_1.npz'
+#print_npz_contents(file_path)
+file_path = r"C:\Users\manue\MASTER_PROJECT_RNA_seq_data\Optimize_ML_simulated_RNA_sequencing_data-main\Optimize_ML_simulated_RNA_sequencing_data-main\LONG_READ_training_data_basecalled\train_data_0_fragment_1.npz"
+print_npz_contents(file_path)
+
+#%%
+
+# check basecalling
+path_basecalled_frament = r"LONG_READ_training_data_basecalled/basecalled_train_data_0_fragment_10.npz"
+data = np.load(path_basecalled_frament)
+
+# 'basecalling' contains predictions with a shape (sequence_length, 5)
+predictions = data['basecalling']
+
+# Extend the base dictionary to include also the spacer
+base_dict = {0: "A", 1: "C", 2: "G", 3: "T", 4: "Spacer"}
+# Define colors for plotting, adding an additional color for the spacer (grey or black?)
+colors = ['blue', 'green', 'red', 'yellow', 'gray']  # Assigning a unique color to each base and the spacer
+
+# Plot the predictions for each base including the spacer
+for base_index, base_label in base_dict.items():
+    plt.plot(predictions[:, base_index], label=base_label, color=colors[base_index], linestyle='-', marker='')
+
+plt.title('Basecalling Predictions for the First Fragment')
+plt.xlabel('Sequence Position')
+plt.ylabel('Prediction Score')
+
+# Add the legend outside the loop to avoid duplicate legend entries
+plt.legend(title="Base")
+plt.show()
+
 
 
 #%%
@@ -85,12 +200,6 @@ print(long_read)
    4.15696263e-01]
   ...
 """
-
-
-
-
-
-
 
 #%%
 import numpy as np

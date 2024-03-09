@@ -1,60 +1,61 @@
-#%%import numpy as np
-import matplotlib.pyplot as plt
-import seaborn as sns
-import numpy as np
+#%%
+ 
+#version before 07.03.24 
 import os
+import numpy as np
 
-# directory containing my .npz files
-directory_path = r'C:\Users\manue\MASTER_PROJECT_RNA_seq_data\Optimize_ML_simulated_RNA_sequencing_data-main\Optimize_ML_simulated_RNA_sequencing_data-main\LONG_READ_training_data_splitted'
+base_path = os.getcwd()
 
-# List all .npz files in this directory
-npz_files = [f for f in os.listdir(directory_path) if f.endswith('.npz')]
+path_to_long_read = os.path.join(base_path, r'LONG_READ_training_data')
+path_save = os.path.join(base_path, r'LONG_READ_training_data_splitted')
 
-# Assuming npz_files and directory_path are defined as before
+# Check if the save path exists, if not, create it
+if not os.path.exists(path_save):
+    os.makedirs(path_save)
 
-def plot_data(signal_train, map_onehot, rand_seq_numeric, file_name):
-    # Convert numeric sequence to string using a predefined dictionary
-    base_dict = {0: "A", 1: "C", 2: "G", 3: "T"}
-    rand_seq = ''.join([base_dict[num] for num in rand_seq_numeric])
+# List all .npz files in the directory
+npz_files = [f for f in os.listdir(path_to_long_read) if f.endswith('.npz')]
+print(npz_files)
+
+def split_and_save(npz_file, fragment_length=1200):  # Default overlap to 0
+    data = np.load(npz_file)
+    signal_train = data['signal_train']
+    map_onehot = data['map_onehot']
+    rand_seq = data['rand_seq']
+   
+    """
+    #load original keys from generated long read
+    signal_train = data['signal_train']
+    map_onehot = data['map_onehot']
+    rand_seq = data['rand_seq']
+    """
+    #signal_train=Sim_raw_signal_tot, map_onehot=Map_raw_signal_tot, rand_seq = Rand_seq
+
+    # Update the calculation of num_fragments for no overlap
+    num_fragments = int(np.ceil(signal_train.shape[1] / fragment_length))
     
-    # Start plotting
-    fig, axs = plt.subplots(3, 1, figsize=(14, 20), constrained_layout=True)
+    base_name = os.path.basename(npz_file)[:-4]  # Remove .npz extension and path
+    for i in range(num_fragments):
+        start = i * fragment_length
+        end = start + fragment_length
+        
+        # Check if the end of the fragment exceeds the signal length
+        if end > signal_train.shape[1]:
+            print("The last fragment does not have 1200 time points. Stopping.")
+            break  # Stop the loop if there are not enough time points left for a full fragment
+        
+        fragment_signal = signal_train[:, start:end]
+        fragment_map = map_onehot[:, start:end, :]
+        
+        # Save the fragment with numerical suffix
+        fragment_file_name = f"{base_name}_fragment_{i+1}.npz"  # Using numbers for fragment naming
+        fragment_file_path = os.path.join(path_save, fragment_file_name)  # Path to save the fragment
+        np.savez_compressed(fragment_file_path, signal_train=fragment_signal, map_onehot=fragment_map, rand_seq=rand_seq)
 
-    # Plot Signal Train
-    axs[0].plot(signal_train)
-    axs[0].set_title('Signal Train')
+        
+        print(f"Saved: {fragment_file_path}")
 
-    # Plot Filled Contour for map_onehot
-    if map_onehot.any():
-        axs[1].contourf(map_onehot.T, cmap='viridis', levels=np.linspace(0, 1, num=50))
-        axs[1].set_title('Filled Contour of One-hot Encoded Map')
-        axs[1].set_xlabel('Time Point')
-        axs[1].set_ylabel('Nucleotide Position')
 
-    # Plot Heatmap for map_onehot using Seaborn
-    sns.heatmap(map_onehot.T, cmap="YlGnBu", cbar_kws={'label': 'Feature Activation'}, ax=axs[2])
-    axs[2].set_title('Map Onehot Features Over Time')
-    axs[2].set_xlabel('Time Points')
-    axs[2].set_ylabel('Features')
-    # Adjusting the y-ticks to show all feature labels
-    axs[2].set_yticks(range(map_onehot.shape[1]))
-    axs[2].set_yticklabels([f'Feature {i}' for i in range(map_onehot.shape[1])])
 
-    plt.suptitle(file_name)
-    plt.show()
 
-    # Print the sequence as a string
-    print(f"Random Sequence for {file_name}: {rand_seq}")
 
-# Loop through each file and plot
-npz_files = [f for f in os.listdir(directory_path) if f.endswith('.npz')]
-for npz_file in npz_files:
-    file_path = os.path.join(directory_path, npz_file)
-    data = np.load(file_path)
-    signal_train = data['signal_train'][0]  
-    map_onehot = data['map_onehot'][0]  
-    rand_seq_numeric = data['rand_seq']  
-
-    plot_data(signal_train, map_onehot, rand_seq_numeric, npz_file)
-
-# %%

@@ -44,7 +44,25 @@ def plot_signal_train(signal_train, file_name):
 
 plot_signal_train(signal_train, file_name)
 
+#%%
+def print_npz_contents(file_path):
+    
+    data = np.load(file_path)
+    
+    # list all keys
+    print("Key in .npz file:")
+    for key in data.keys():
+        print(f"- {key}")
+    
+    # check content of each key
+    for key in data.keys():
+        print(f"\nContent of '{key}':")
+        content = data[key]
+        print(content)
+        
+        print(f"Data type: {content.dtype}, Shape: {content.shape}")
 
+print_npz_contents(file_path)
 #%%
 # 2. Split LONG READ into fragments à 1200 time points - save in folder LONG_READ_training_data_splitted
 from LONG_READ_2_Split import split_and_save, npz_files, path_to_long_read
@@ -126,7 +144,7 @@ def print_npz_contents(file_path):
 # function call
 #file_path = r'C:\Users\manue\MASTER_PROJECT_RNA_seq_data\Optimize_ML_simulated_RNA_sequencing_data-main\Optimize_ML_simulated_RNA_sequencing_data-main\LONG_READ_training_data_splitted\train_data_0_fragment_1.npz'
 #print_npz_contents(file_path)
-file_path = r"C:\Users\manue\MASTER_PROJECT_RNA_seq_data\Optimize_ML_simulated_RNA_sequencing_data-main\Optimize_ML_simulated_RNA_sequencing_data-main\LONG_READ_training_data_basecalled\train_data_0_fragment_1.npz"
+file_path = r"C:\Users\manue\MASTER_PROJECT_RNA_seq_data\Optimize_ML_simulated_RNA_sequencing_data-main\Optimize_ML_simulated_RNA_sequencing_data-main\LONG_READ_training_data_basecalled\basecalled_train_data_0_fragment_1.npz"
 print_npz_contents(file_path)
 
 #%%
@@ -168,38 +186,15 @@ rearrange_fragments_to_long_read(input_dir, path_save_rearranged, output_filenam
 #%%
 
 # 4. Rearrange results of fragments back to LONG READ
-rearranged_npz = r"C:\Users\manue\MASTER_PROJECT_RNA_seq_data\Optimize_ML_simulated_RNA_sequencing_data-main\Optimize_ML_simulated_RNA_sequencing_data-main\LONG_READ_training_data_rearranged\basecalled_long_read_rearranged.npz"
-data = np.load(rearranged_npz)
-print(list(data.keys()))
+from LONG_READ_4_Rearrange import recombine_basecalling
 
-long_read = data['long_read']
-print(long_read)
+# Use the function to recombine basecalling data
+base_path = os.getcwd()
+input_dir = os.path.join(base_path, 'LONG_READ_training_data_basecalled')
+output_file_path = os.path.join(base_path, 'recombined_long_read_basecalling.npz')
 
-# long read is saved with 
-"""
-['long_read']
-[[[1.50911538e-02 5.19840181e-01 5.17301844e-04 6.47091586e-03
-   4.58080381e-01]
-  [6.93952339e-03 4.34740514e-01 2.79572268e-04 5.56761539e-03
-   5.52472770e-01]
-  [3.66408913e-03 3.83335382e-01 2.74935010e-04 6.44197734e-03
-   6.06283545e-01]
-  ...
-  [1.68079495e-01 3.43627006e-01 2.08609685e-01 2.32912704e-01
-   4.67710607e-02]
-  [1.62946343e-01 3.31625313e-01 2.07538679e-01 2.28884533e-01
-   6.90051466e-02]
-  [1.52573749e-01 3.03563654e-01 2.01893032e-01 2.24403754e-01
-   1.17565751e-01]]
+recombine_basecalling(input_dir, output_file_path)
 
- [[2.81222351e-02 5.32392692e-03 5.82746685e-01 3.03320307e-03
-   3.80774051e-01]
-  [1.60369612e-02 3.69668752e-03 5.52399814e-01 3.24702542e-03
-   4.24619466e-01]
-  [1.17807081e-02 2.47922959e-03 5.66019773e-01 4.02401946e-03
-   4.15696263e-01]
-  ...
-"""
 
 #%%
 import numpy as np
@@ -223,23 +218,230 @@ print(basecalling)
 print(original_data)
 
 #%%
-from LONG_READ_5_Original_vs_Basecalling import compare_sequences, load_sequence, plot_mismatches
-base_path = os.getcwd()
 
-# Load sequences
-original_seq_path = os.path.join(base_path, 'LONG_READ_training_data')
-basecalled_seq_path = os.path.join(base_path, 'LONG_READ_data_rearranged')
+"""Check recombination and the shape"""
+path_recombined = r"C:\Users\manue\MASTER_PROJECT_RNA_seq_data\Optimize_ML_simulated_RNA_sequencing_data-main\Optimize_ML_simulated_RNA_sequencing_data-main\recombined_long_read_basecalling.npz"
 
-# Assuming you're comparing the first .npz file in each directory
-original_seq_file = next((f for f in os.listdir(original_seq_path) if f.endswith('.npz')), None)
-basecalled_seq_file = next((f for f in os.listdir(basecalled_seq_path) if f.endswith('.npz')), None)
+# Load the .npz file, then access the 'recombined_basecalling' array
+basecalling_data = np.load(path_recombined)['recombined_basecalling']
 
-if original_seq_file and basecalled_seq_file:
-    original_seq = load_sequence(os.path.join(original_seq_path, original_seq_file), 'rand_seq')
-    basecalled_seq = load_sequence(os.path.join(basecalled_seq_path, basecalled_seq_file), 'basecalling')
+def print_npz_contents(file_path):
+    
+    data = np.load(file_path)
+    
+    # list all keys
+    print("Key in .npz file:")
+    for key in data.keys():
+        print(f"- {key}")
+    
+    # check content of each key
+    for key in data.keys():
+        print(f"\nContent of '{key}':")
+        content = data[key]
+        print(content)
+        
+        print(f"Data type: {content.dtype}, Shape: {content.shape}")
 
-    mismatches = compare_sequences(original_seq, basecalled_seq)
-    plot_mismatches(original_seq, basecalled_seq, mismatches)
-else:
-    print("Required .npz files not found in the directories.")
+print_npz_contents(path_recombined)
+
+#%%
+
+"""prediction plot ?"""
+#%%
+
+""" 5. Get basecalled sequence using argmax - printing the seq"""
+
+import numpy as np
+
+# Full path to your .npz file
+path_recombined = "C:\\Users\\manue\\MASTER_PROJECT_RNA_seq_data\\Optimize_ML_simulated_RNA_sequencing_data-main\\Optimize_ML_simulated_RNA_sequencing_data-main\\recombined_long_read_basecalling.npz"
+
+# Load the .npz file and extract the 'recombined_basecalling' data
+basecalling_data = np.load(path_recombined)['recombined_basecalling']
+
+# Dictionary to map indices to nucleotide bases, including the spacer 'S'
+index_to_base = {0: 'A', 1: 'C', 2: 'G', 3: 'T', 4: 'S'}
+
+# Function to decode numerical array to sequence, including the spacer 'S'
+def decode_sequence(numerical_array):
+    return ''.join(index_to_base[idx] for idx in numerical_array)
+
+# Decode sequences for all 32 samples
+decoded_sequences = []
+for sample in basecalling_data:
+    # Use argmax to find the index of the highest value at each time point
+    predicted_indices = np.argmax(sample, axis=1)
+    # Decode the indices to a sequence
+    sequence = decode_sequence(predicted_indices)
+    decoded_sequences.append(sequence)
+
+# Print the decoded sequences for all 32 samples
+for i, seq in enumerate(decoded_sequences):
+    print(f"Sample {i+1} Sequence: {seq}")
+
+
+#%%
+    
+""" 5. Get basecalled sequence using argmax - saving the 32seqs into a npu file """
+import numpy as np
+
+# Full path to your .npz file
+path_recombined = "C:\\Users\\manue\\MASTER_PROJECT_RNA_seq_data\\Optimize_ML_simulated_RNA_sequencing_data-main\\Optimize_ML_simulated_RNA_sequencing_data-main\\recombined_long_read_basecalling.npz"
+
+# Load the .npz file and extract the 'recombined_basecalling' data
+basecalling_data = np.load(path_recombined)['recombined_basecalling']
+
+# Dictionary to map indices to nucleotide bases, including the spacer 'S'
+index_to_base = {0: 'A', 1: 'C', 2: 'G', 3: 'T', 4: 'S'}
+
+# Function to decode numerical array to sequence, including the spacer 'S'
+def decode_sequence(numerical_array):
+    return ''.join(index_to_base[idx] for idx in numerical_array)
+
+# Decode sequences for all 32 samples
+decoded_sequences = {}
+for sample_idx, sample in enumerate(basecalling_data):
+    # Use argmax to find the index of the highest value at each time point
+    predicted_indices = np.argmax(sample, axis=1)
+    # Decode the indices to a sequence
+    sequence = decode_sequence(predicted_indices)
+    # Store each sequence in the dictionary with a unique key
+    decoded_sequences[f'seq{sample_idx+1}'] = sequence
+
+# Save the sequences into an npz file
+output_path = "C:\\Users\\manue\\MASTER_PROJECT_RNA_seq_data\\Optimize_ML_simulated_RNA_sequencing_data-main\\Optimize_ML_simulated_RNA_sequencing_data-main\\decoded_sequences.npz"
+np.savez_compressed(output_path, **decoded_sequences)
+
+
+
+#%%
+npz_file_path = "C:\\Users\\manue\\MASTER_PROJECT_RNA_seq_data\\Optimize_ML_simulated_RNA_sequencing_data-main\\Optimize_ML_simulated_RNA_sequencing_data-main\\decoded_sequences.npz"
+npz_file = np.load(npz_file_path)
+
+# List all entries/keys in the npz file
+keys = npz_file.files
+print(keys)
+first_key_shape = npz_file['seq1'].shape
+print(first_key_shape)
+
+#empty shape
+#%%
+import numpy as np
+
+# Load the .npz file
+npz_file_path = "C:\\Users\\manue\\MASTER_PROJECT_RNA_seq_data\\Optimize_ML_simulated_RNA_sequencing_data-main\\Optimize_ML_simulated_RNA_sequencing_data-main\\decoded_sequences.npz"
+npz_file = np.load(npz_file_path)
+
+# Function to safely get the length of data under a key
+def get_data_length(data):
+    if isinstance(data, np.ndarray) and data.shape == ():  # If data is a scalar numpy array
+        data = data.item()  # Convert to a Python scalar
+    if isinstance(data, str):  # Check if the data is a string
+        return len(data)
+    else:
+        return "Unknown format"  # Replace with appropriate handling
+
+# Retrieve and print lengths for specific keys
+first_key_length = get_data_length(npz_file['seq1'])
+tenth_key_length = get_data_length(npz_file['seq10'])
+last_key_name = sorted(npz_file.files)[-1]
+last_key_length = get_data_length(npz_file[last_key_name])
+
+print(f"Length of the first sequence (seq1): {first_key_length}")
+print(f"Length of the tenth sequence (seq10): {tenth_key_length}")
+print(f"Length of the last sequence ({last_key_name}): {last_key_length}")
+
+
+
+#%%
+
+
+
+
+#%%
+
+""" 6. Compare original vs basecalled sequence using pairwise """
+
+
+
+import numpy as np
+from Levenshtein import distance as levenshtein_distance
+
+# Load the decoded sequences
+decoded_sequences_path = "C:\\Users\\manue\\MASTER_PROJECT_RNA_seq_data\\Optimize_ML_simulated_RNA_sequencing_data-main\\Optimize_ML_simulated_RNA_sequencing_data-main\\decoded_sequences.npz"
+decoded_sequences_file = np.load(decoded_sequences_path)
+
+# Load the original sequence (rand_seq) from train_data_0.npz
+train_data_path = "C:\\Users\\manue\\MASTER_PROJECT_RNA_seq_data\\Optimize_ML_simulated_RNA_sequencing_data-main\\Optimize_ML_simulated_RNA_sequencing_data-main\\LONG_READ_training_data\\train_data_0.npz"
+train_data_file = np.load(train_data_path)
+rand_seq = train_data_file['rand_seq']
+
+# Convert rand_seq from numerical values to string using the same mapping
+index_to_base = {0: 'A', 1: 'C', 2: 'G', 3: 'T', 4: 'S'}
+original_sequence = ''.join(index_to_base[base] for base in rand_seq)
+
+# Function to compare each decoded sequence with the original
+def compare_sequences(decoded_sequences_file, original_sequence):
+    results = {}
+    for key in decoded_sequences_file.files:
+        decoded_sequence = decoded_sequences_file[key]
+        if isinstance(decoded_sequence, np.ndarray) and decoded_sequence.shape == ():
+            decoded_sequence = decoded_sequence.item()  # Convert to Python scalar if needed
+        # Calculate Levenshtein distance (edit distance) between decoded and original sequence
+        distance = levenshtein_distance(decoded_sequence, original_sequence)
+        results[key] = distance
+    return results
+
+# Compare and get the results
+comparison_results = compare_sequences(decoded_sequences_file, original_sequence)
+
+# Print comparison results
+for seq_key, distance in comparison_results.items():
+    print(f"Edit distance for {seq_key}: {distance}")
+
+
+
+
+# %%
+
+
+import numpy as np
+from Bio import pairwise2
+from Bio.pairwise2 import format_alignment
+
+# Load the decoded sequences
+decoded_sequences_path = r"C:\\Users\\manue\\MASTER_PROJECT_RNA_seq_data\\Optimize_ML_simulated_RNA_sequencing_data-main\\Optimize_ML_simulated_RNA_sequencing_data-main\\decoded_sequences.npz"
+decoded_sequences_file = np.load(decoded_sequences_path)
+
+# Load the original sequence (rand_seq) from train_data_0.npz
+train_data_path = r"C:\\Users\\manue\\MASTER_PROJECT_RNA_seq_data\\Optimize_ML_simulated_RNA_sequencing_data-main\\Optimize_ML_simulated_RNA_sequencing_data-main\\LONG_READ_training_data\\train_data_0.npz"
+train_data_file = np.load(train_data_path)
+rand_seq = train_data_file['rand_seq']
+
+# Assuming rand_seq is a numpy array of numerical values, convert to string
+index_to_base = {0: 'A', 1: 'C', 2: 'G', 3: 'T', 4: 'S'}  # Include 4: 'S' if your rand_seq includes spacers
+original_sequence = ''.join(index_to_base[base] for base in rand_seq)
+
+# Function to compare each decoded sequence with the original using pairwise2
+def compare_sequences_pairwise(decoded_sequences_file, original_sequence):
+    alignments = {}
+    for key in decoded_sequences_file.files:
+        decoded_sequence = decoded_sequences_file[key]
+        if isinstance(decoded_sequence, np.ndarray) and decoded_sequence.shape == ():
+            decoded_sequence = decoded_sequence.item()  # Convert to Python scalar if needed
+
+        # Perform global alignment
+        alignment = pairwise2.align.globalxx(original_sequence, decoded_sequence, one_alignment_only=True)[0]
+        alignments[key] = alignment
+    return alignments
+
+# Compare and get the alignments
+alignments = compare_sequences_pairwise(decoded_sequences_file, original_sequence)
+
+# Print alignments for each sequence
+for seq_key, alignment in alignments.items():
+    print(f"Alignment for {seq_key}:")
+    print(format_alignment(*alignment))
+    print("\n")
+
 # %%

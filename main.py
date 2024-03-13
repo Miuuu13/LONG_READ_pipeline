@@ -606,50 +606,6 @@ for seq_key, distance in comparison_results.items():
 
 
 
-# %%
-
-""" 6. Compare original vs basecalled sequence using pairwise """
-
-import numpy as np
-from Bio import pairwise2
-from Bio.pairwise2 import format_alignment
-
-# Load the decoded sequences
-decoded_sequences_path = r"C:\\Users\\manue\\MASTER_PROJECT_RNA_seq_data\\Optimize_ML_simulated_RNA_sequencing_data-main\\Optimize_ML_simulated_RNA_sequencing_data-main\\decoded_sequences.npz"
-decoded_sequences_file = np.load(decoded_sequences_path)
-
-# Load the original sequence (rand_seq) from train_data_0.npz
-train_data_path = r"C:\\Users\\manue\\MASTER_PROJECT_RNA_seq_data\\Optimize_ML_simulated_RNA_sequencing_data-main\\Optimize_ML_simulated_RNA_sequencing_data-main\\LONG_READ_training_data\\train_data_0.npz"
-train_data_file = np.load(train_data_path)
-rand_seq = train_data_file['signal_train']
-print(rand_seq)
-
-# Assuming rand_seq is a numpy array of numerical values, convert to string
-index_to_base = {0: 'A', 1: 'C', 2: 'G', 3: 'T', 4: 'S'}  # Include 4: 'S' if your rand_seq includes spacers
-original_sequence = ''.join(index_to_base[base] for base in rand_seq)
-
-# Function to compare each decoded sequence with the original using pairwise2
-def compare_sequences_pairwise(decoded_sequences_file, original_sequence):
-    alignments = {}
-    for key in decoded_sequences_file.files:
-        decoded_sequence = decoded_sequences_file[key]
-        if isinstance(decoded_sequence, np.ndarray) and decoded_sequence.shape == ():
-            decoded_sequence = decoded_sequence.item()  # Convert to Python scalar if needed
-
-        # Perform global alignment
-        alignment = pairwise2.align.globalxx(original_sequence, decoded_sequence, one_alignment_only=True)[0]
-        alignments[key] = alignment
-    return alignments
-
-# Compare and get the alignments
-alignments = compare_sequences_pairwise(decoded_sequences_file, original_sequence)
-
-# Print alignments for each sequence
-for seq_key, alignment in alignments.items():
-    print(f"Alignment for {seq_key}:")
-    print(format_alignment(*alignment))
-    print("\n")
-
 
 
 # %%

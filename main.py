@@ -4,8 +4,6 @@ import matplotlib.pyplot as plt
 import os
 
 """ Main script to run LONG READ pipeline """
-
-# working directory
 base_path = os.getcwd()
 
 # Steps of the pipeline

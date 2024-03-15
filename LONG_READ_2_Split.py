@@ -54,8 +54,4 @@ def split_and_save(npz_file, fragment_length=1200):  # Default overlap to 0
 
         
         print(f"Saved: {fragment_file_path}")
-
-
-
-
-
+#%%

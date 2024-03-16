@@ -137,6 +137,10 @@ print_npz_contents(file_path)
 #%%
 
 """check basecalling - looks weird """
+
+
+#TODO: Change to contour plot or heatmap (after integrating step 6)
+
 path_basecalled_frament = r"LONG_READ_training_data_basecalled/basecalled_train_data_0_fragment_10.npz"
 data = np.load(path_basecalled_frament)
 
@@ -232,7 +236,9 @@ for i, seq in enumerate(decoded_sequences):
 
 #%%
     
-""" 5. Get basecalled sequence using argmax - saving the 32seqs into a npz file """
+""" 5. Get basecalled sequence using argmax - saving the 32seqs into a npz file -
+This was maily for checking how the sequences now look like the next cell is the one that saves them into a npz file 
+before doing the comparison, there need to be removed: consecutive nases and the spacer!"""
 import numpy as np
 
 # Full path to your .npz file
@@ -272,8 +278,7 @@ npz_file = np.load(npz_file_path)
 keys = npz_file.files
 print(keys)
 first_key_shape = npz_file['seq1'].shape
-print(first_key_shape) 
-"""empty key shape ?"""
+
 
 
 #%%
@@ -344,6 +349,116 @@ np.savez_compressed(output_path_without_S, **shortened_sequences_without_S)
 
 
 #%%
+
+#----------------- new 16MRC24 ----------------------------
+
+""" 7. Compare """
+path_original = r"C:\Users\manue\MASTER_PROJECT_RNA_seq_data\Optimize_ML_simulated_RNA_sequencing_data-main\Optimize_ML_simulated_RNA_sequencing_data-main\LONG_READ_training_data\train_data_0.npz"
+path_basecalled = r"C:\Users\manue\MASTER_PROJECT_RNA_seq_data\Optimize_ML_simulated_RNA_sequencing_data-main\Optimize_ML_simulated_RNA_sequencing_data-main\shortened_sequences_without_S.npz"
+
+
+def print_npz_keys(file_path):
+    try:
+        with np.load(file_path) as data:
+            print(f"Keys in {file_path}: {list(data.keys())}")
+    except IOError:
+        print(f"Error: Could not load data from {file_path}")
+
+print_npz_keys(path_original)
+print_npz_keys(path_basecalled)
+
+#%%
+def print_npz_keys_and_shapes(file_path):
+    try:
+        with np.load(file_path) as data:
+            print(f"Keys in {file_path}: {list(data.keys())}")
+            for key in data.keys():
+                print(f"Shape of {key}: {data[key].shape}")
+    except IOError:
+        print(f"Error: Could not load data from {file_path}")
+
+print(f"Shape of rand_seq in {path_original}:")
+with np.load(path_original) as data_original:
+    print(data_original["rand_seq"].shape)
+
+print_npz_keys_and_shapes(path_basecalled)
+
+#%%
+def print_npz_keys_and_content(file_path):
+    try:
+        with np.load(file_path) as data:
+            print(f"Keys in {file_path}: {list(data.keys())}")
+            for key in data.keys():
+                print(f"Content of {key}:")
+                print(data[key])
+    except IOError:
+        print(f"Error: Could not load data from {file_path}")
+
+print(f"Content of rand_seq in {path_original}:")
+with np.load(path_original) as data_original:
+    print(data_original["rand_seq"])
+
+print_npz_keys_and_content(path_basecalled)
+
+#%%
+
+def print_npz_keys_and_content_length(file_path):
+    try:
+        with np.load(file_path) as data:
+            print(f"Keys in {file_path}: {list(data.keys())}")
+            for key in data.keys():
+                print(f"Content of {key}:")
+                print(data[key])
+                print(f"Length of {key}: {len(data[key])}")
+    except IOError:
+        print(f"Error: Could not load data from {file_path}")
+
+print(f"Content of rand_seq in {path_original}:")
+with np.load(path_original) as data_original:
+    print(data_original["rand_seq"])
+
+print_npz_keys_and_content_length(path_basecalled)
+
+
+
+#%%
+def print_npz_keys_and_content_length(file_path):
+    try:
+        with np.load(file_path) as data:
+            print(f"Keys in {file_path}: {list(data.keys())}")
+            for key in data.keys():
+                print(f"Content of {key}:")
+                print(data[key])
+                if isinstance(data[key], np.ndarray):
+                    print(f"Length of {key}: {data[key].shape}")
+                else:
+                    print(f"Length of {key}: Not applicable (not an ndarray)")
+    except IOError:
+        print(f"Error: Could not load data from {file_path}")
+
+print(f"Content of rand_seq in {path_original}:")
+with np.load(path_original) as data_original:
+    print(data_original["rand_seq"])
+
+print_npz_keys_and_content_length(path_basecalled)
+
+
+
+
+
+
+
+
+
+
+
+
+
+#%%
+
+
+
+
 import numpy as np
 """ 6. Compare original vs basecalled sequence """
 train_data_path = r"C:\Users\manue\MASTER_PROJECT_RNA_seq_data\Optimize_ML_simulated_RNA_sequencing_data-main\Optimize_ML_simulated_RNA_sequencing_data-main\LONG_READ_training_data\train_data_0.npz"
@@ -520,7 +635,9 @@ for seq_key, alignment in alignments.items():
 
 
 #%%
-!pip install biopython
+
+""" How to force installation inside an environment """
+#!pip install biopython
 
 
 # %%

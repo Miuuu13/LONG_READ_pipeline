@@ -147,7 +147,7 @@ data = np.load(path_basecalled_frament)
 predictions = data['basecalling']
 
 # Extend the base dictionary to include also the spacer
-base_dict = {0: "A", 1: "C", 2: "G", 3: "T", 4: "Spacer"}
+base_dict = {0: "A", 1: "C", 2: "G", 3: "T", 4: "S"}
 # Define colors for plotting, adding an additional color for the spacer (grey or black?)
 colors = ['blue', 'green', 'red', 'yellow', 'gray']  
 
@@ -357,48 +357,7 @@ path_original = r"C:\Users\manue\MASTER_PROJECT_RNA_seq_data\Optimize_ML_simulat
 path_basecalled = r"C:\Users\manue\MASTER_PROJECT_RNA_seq_data\Optimize_ML_simulated_RNA_sequencing_data-main\Optimize_ML_simulated_RNA_sequencing_data-main\shortened_sequences_without_S.npz"
 
 
-def print_npz_keys(file_path):
-    try:
-        with np.load(file_path) as data:
-            print(f"Keys in {file_path}: {list(data.keys())}")
-    except IOError:
-        print(f"Error: Could not load data from {file_path}")
 
-print_npz_keys(path_original)
-print_npz_keys(path_basecalled)
-
-#%%
-def print_npz_keys_and_shapes(file_path):
-    try:
-        with np.load(file_path) as data:
-            print(f"Keys in {file_path}: {list(data.keys())}")
-            for key in data.keys():
-                print(f"Shape of {key}: {data[key].shape}")
-    except IOError:
-        print(f"Error: Could not load data from {file_path}")
-
-print(f"Shape of rand_seq in {path_original}:")
-with np.load(path_original) as data_original:
-    print(data_original["rand_seq"].shape)
-
-print_npz_keys_and_shapes(path_basecalled)
-
-#%%
-def print_npz_keys_and_content(file_path):
-    try:
-        with np.load(file_path) as data:
-            print(f"Keys in {file_path}: {list(data.keys())}")
-            for key in data.keys():
-                print(f"Content of {key}:")
-                print(data[key])
-    except IOError:
-        print(f"Error: Could not load data from {file_path}")
-
-print(f"Content of rand_seq in {path_original}:")
-with np.load(path_original) as data_original:
-    print(data_original["rand_seq"])
-
-print_npz_keys_and_content(path_basecalled)
 
 #%%
 

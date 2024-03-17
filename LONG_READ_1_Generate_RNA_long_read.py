@@ -107,4 +107,7 @@ def Generate_sim_signal(N_batch, batch_size , path, kmer_info, seq_len , time_po
         file_name = "train_data_{}.npz".format(j);
 
         np.savez_compressed(os.path.join(path,file_name), signal_train=Sim_raw_signal_tot, map_onehot=Map_raw_signal_tot, rand_seq = Rand_seq)
+
+
+
 # %%

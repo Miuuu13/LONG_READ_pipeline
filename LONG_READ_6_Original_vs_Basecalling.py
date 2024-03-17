@@ -1,3 +1,11 @@
+
+#%%
+
+
+
+
+
+
 #%%
 
 import numpy as np
@@ -7,9 +15,6 @@ import difflib
 base_path = os.getcwd() # working directory
 path_to_rearranged = os.path.join(base_path, r'LONG_READ_rearranged')
 
-basecalled_data_rearranged = np.load(path_to_rearranged)
-
-# Load the rearranged basecalled data
 basecalled_data_rearranged = np.load(path_to_rearranged)
 
 # List all the keys in the .npz file

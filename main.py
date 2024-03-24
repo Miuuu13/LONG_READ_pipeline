@@ -30,7 +30,7 @@ data = np.load(file_path)
 signal_train = data['signal_train'][0]  
 
 def plot_signal_train(signal_train, file_name):
-    plt.figure(figsize=(14, 5))  
+    plt.figure(figsize=(40, 5))  
     plt.plot(signal_train)
     plt.title(f'Signal Train for {file_name}')
     plt.xlabel('Time Points')
@@ -134,35 +134,98 @@ def print_npz_contents(file_path):
 file_path = r"C:\Users\manue\MASTER_PROJECT_RNA_seq_data\Optimize_ML_simulated_RNA_sequencing_data-main\Optimize_ML_simulated_RNA_sequencing_data-main\LONG_READ_training_data_basecalled\basecalled_train_data_0_fragment_1.npz"
 print_npz_contents(file_path)
 
+#----------------------After Basecalling --------------------
+
 #%%
 
-"""check basecalling - looks weird """
+
+""" Check basecalling - heatmap """
+import numpy as np
+import matplotlib.pyplot as plt
+import re
 
 
-#TODO: Change to contour plot or heatmap (after integrating step 6)
 
-path_basecalled_frament = r"LONG_READ_training_data_basecalled/basecalled_train_data_0_fragment_10.npz"
+path_basecalled_frament = r"LONG_READ_training_data_basecalled/basecalled_train_data_0_fragment_20.npz"
+# Load the data
 data = np.load(path_basecalled_frament)
+basecalling = data['basecalling']
 
-predictions = data['basecalling']
+first_basecalling = basecalling[0]
 
-# Extend the base dictionary to include also the spacer
-base_dict = {0: "A", 1: "C", 2: "G", 3: "T", 4: "S"}
-# Define colors for plotting, adding an additional color for the spacer (grey or black?)
-colors = ['blue', 'green', 'red', 'yellow', 'gray']  
+#-----
+"""Function to extract fragment"""
+def extract_fragment(filename):
+    
+    pattern = r"data_\d+_(fragment_\d+)"
+    match = re.search(pattern, filename)
+    if match:
 
-# Plot the predictions for each base including the spacer
-for base_index, base_label in base_dict.items():
-    plt.plot(predictions[:, base_index], label=base_label, color=colors[base_index], linestyle='-', marker='')
+        return match.group(1)
+    else:
+        return None
 
-plt.title('Basecalling Predictions for the First Fragment')
-plt.xlabel('Sequence Position')
-plt.ylabel('Prediction Score')
+filename = path_basecalled_frament
+fragment = extract_fragment(filename)
+print(fragment)
 
-# Add the legend outside the loop to avoid duplicate legend entries
-plt.legend(title="Base")
+#-----
+
+# Plot the heatmap
+plt.imshow(first_basecalling.T, aspect='auto', cmap='viridis')
+plt.colorbar(label='Basecalling Score')
+plt.xlabel('Position in Sequence')
+plt.ylabel('Base (One-hot encoded)')
+plt.title(f"Basecalling Heatmap for {fragment}")
+plt.yticks(ticks=np.arange(5), labels=["A", "C", "G", "T", "Spacer"])
 plt.show()
 
+
+#%%
+""" Check basecalling - line plot """
+import numpy as np
+import matplotlib.pyplot as plt
+import re
+path_basecalled_frament = r"LONG_READ_training_data_basecalled/basecalled_train_data_0_fragment_20.npz"
+# Load
+data = np.load(path_basecalled_frament)
+basecalling = data['basecalling']
+first_basecalling = basecalling[0]
+#-----
+"""Function to extract fragment"""
+def extract_fragment(filename):
+    
+    pattern = r"data_\d+_(fragment_\d+)"
+    match = re.search(pattern, filename)
+    if match:      
+        return match.group(1)
+    else:
+        return None
+
+filename = path_basecalled_frament
+fragment = extract_fragment(filename)
+print(fragment)
+#-----
+
+# Define a dictionary to map the base index to a base label
+base_dict = {0: "A", 1: "C", 2: "G", 3: "T", 4: "Spacer"}
+colors = ['blue', 'green', 'red', 'purple', 'gray']
+
+# Plot the line plot for each base
+for base_index in range(5):
+    plt.plot(first_basecalling[:, base_index], label=base_dict[base_index], color=colors[base_index])
+
+plt.legend(title="Base")
+plt.xlabel('Position in Sequence')
+plt.ylabel('Basecalling Score')
+plt.title(f"Basecalling Predictions for {fragment}")
+plt.figure(figsize=(12, 6))
+
+plt.show()
+
+
+
+# ------------------------STEP 4 --------------------
 
 #%%
 
@@ -176,31 +239,7 @@ output_file_path = os.path.join(base_path, 'recombined_long_read_basecalling.npz
 
 recombine_basecalling(input_dir, output_file_path)
 
-#%%
 
-"""Check recombination and the shape"""
-path_recombined = r"C:\Users\manue\MASTER_PROJECT_RNA_seq_data\Optimize_ML_simulated_RNA_sequencing_data-main\Optimize_ML_simulated_RNA_sequencing_data-main\recombined_long_read_basecalling.npz"
-
-basecalling_data = np.load(path_recombined)['recombined_basecalling']
-
-def print_npz_contents(file_path):
-    
-    data = np.load(file_path)
-    
-    # list all keys
-    print("Key in .npz file:")
-    for key in data.keys():
-        print(f"- {key}")
-    
-    # check content of each key
-    for key in data.keys():
-        print(f"\nContent of '{key}':")
-        content = data[key]
-        print(content)
-        
-        print(f"Data type: {content.dtype}, Shape: {content.shape}")
-
-print_npz_contents(path_recombined)
 
 #%%
 
@@ -271,6 +310,7 @@ np.savez_compressed(output_path, **decoded_sequences)
 
 
 #%%
+"""
 npz_file_path = "C:\\Users\\manue\\MASTER_PROJECT_RNA_seq_data\\Optimize_ML_simulated_RNA_sequencing_data-main\\Optimize_ML_simulated_RNA_sequencing_data-main\\decoded_sequences.npz"
 npz_file = np.load(npz_file_path)
 
@@ -278,13 +318,15 @@ npz_file = np.load(npz_file_path)
 keys = npz_file.files
 print(keys)
 first_key_shape = npz_file['seq1'].shape
-
+"""
 
 
 #%%
 import numpy as np 
 
 """ Remove consecutive duplicated in the sequences"""
+
+# remove duplicates first, then spacer
 
 import numpy as np
 
@@ -490,69 +532,7 @@ print("Length of seq1 (after processing):", len(seq1))
 print("Length of the original sequence string:", len(original_seq_str))
 
 
-#%%
-""" 6. Compare original vs basecalled sequence using levenstein """
-import numpy as np
-from Levenshtein import distance as levenshtein_distance
 
-def decode_rand_seq(rand_seq, index_to_base):
-    return ''.join(index_to_base[base] for base in rand_seq)
-
-def compare_sequences(original_sequence, decoded_sequences_file):
-    comparison_results = {}
-    for key in decoded_sequences_file.files:
-        decoded_sequence = decoded_sequences_file[key]
-        if isinstance(decoded_sequence, np.ndarray) and decoded_sequence.shape == ():
-            decoded_sequence = decoded_sequence.item()  
-        
-        distance = levenshtein_distance(original_sequence, decoded_sequence)
-        comparison_results[key] = distance
-    return comparison_results
-
-decoded_sequences_path = r"C:\Users\manue\MASTER_PROJECT_RNA_seq_data\Optimize_ML_simulated_RNA_sequencing_data-main\Optimize_ML_simulated_RNA_sequencing_data-main\decoded_sequences.npz"
-decoded_sequences_file = np.load(decoded_sequences_path)
-
-train_data_path = r"C:\Users\manue\MASTER_PROJECT_RNA_seq_data\Optimize_ML_simulated_RNA_sequencing_data-main\Optimize_ML_simulated_RNA_sequencing_data-main\LONG_READ_training_data\train_data_0.npz"
-train_data_file = np.load(train_data_path)
-rand_seq = train_data_file['rand_seq']
-index_to_base = {0: 'A', 1: 'C', 2: 'G', 3: 'T', 4: 'S'}
-original_sequence = decode_rand_seq(rand_seq, index_to_base)
-
-comparison_results = compare_sequences(original_sequence, decoded_sequences_file)
-
-for seq_key, distance in comparison_results.items():
-    print(f"Edit distance for {seq_key}: {distance}")
-
-#%%%
-
-import numpy as np
-from Levenshtein import distance as levenshtein_distance
-
-decoded_sequences_path = "C:\\Users\\manue\\MASTER_PROJECT_RNA_seq_data\\Optimize_ML_simulated_RNA_sequencing_data-main\\Optimize_ML_simulated_RNA_sequencing_data-main\\recombined_long_read_basecalling.npz"
-decoded_sequences_file = np.load(decoded_sequences_path)
-
-train_data_path = "C:\\Users\\manue\\MASTER_PROJECT_RNA_seq_data\\Optimize_ML_simulated_RNA_sequencing_data-main\\Optimize_ML_simulated_RNA_sequencing_data-main\\LONG_READ_training_data\\train_data_0.npz"
-train_data_file = np.load(train_data_path)
-rand_seq = train_data_file['signal_train']
-
-index_to_base = {0: 'A', 1: 'C', 2: 'G', 3: 'T', 4: 'S'}
-original_sequence = ''.join(index_to_base[base] for base in rand_seq)
-print(original_sequence)
-def compare_sequences(decoded_sequences_file, original_sequence):
-    results = {}
-    for key in decoded_sequences_file.files:
-        decoded_sequence = decoded_sequences_file[key]
-        if isinstance(decoded_sequence, np.ndarray) and decoded_sequence.shape == ():
-            decoded_sequence = decoded_sequence.item()  
-            
-        distance = levenshtein_distance(decoded_sequence, original_sequence)
-        results[key] = distance
-    return results
-
-comparison_results = compare_sequences(decoded_sequences_file, original_sequence)
-
-for seq_key, distance in comparison_results.items():
-    print(f"Edit distance for {seq_key}: {distance}")
 
 # %%
 
